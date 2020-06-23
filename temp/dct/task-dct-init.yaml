@@ -25,7 +25,9 @@ spec:
     - name: resource-group
       description: the resource group
     - name: validation-signer
-      description: current signer
+      description: validation signer
+    - name: build-signer
+      description: build signer
     - name: working-dir
       default: "/root"
     - name: api-endpoint
@@ -71,6 +73,8 @@ spec:
           value: $(params.working-dir)
         - name: DEVOPS_VALIDATION_SIGNER
           value: $(params.validation-signer)
+        - name: DEVOPS_BUILD_SIGNER
+          value: $(params.build-signer)
       command: ["/bin/bash", "-c"]
       workingDir: /artifacts
       # yamllint disable rule:line-length
@@ -84,7 +88,9 @@ spec:
             trap env EXIT
             set -x
           fi
-
+          echo "ADD DOCKER"
+          echo "DEVOPS_VALIDATION_SIGNER $DEVOPS_VALIDATION_SIGNER"
+          echo "DEVOPS_BUILD_SIGNER $DEVOPS_BUILD_SIGNER"
           source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/add_docker.sh")
           # Get the notary binary
           curl -L https://github.com/theupdateframework/notary/releases/download/v0.6.1/notary-Linux-amd64 -o /usr/local/bin/notary
@@ -151,14 +157,17 @@ spec:
 
           echo "Create signer $DEVOPS_SIGNER for $REGISTRY_URL/$REGISTRY_NAMESPACE/$IMAGE_NAME"
           echo "Building signer list"
-          #signerList=("$DEVOPS_BUILD_SIGNER" "$DEVOPS_VALIDATION_SIGNER")
-          #for i in "${signerList[@]}"; do
-          #DEVOPS_SIGNER=$i
-          DEVOPS_SIGNER=$DEVOPS_VALIDATION_SIGNER
-          # Restore root & repository keys
-          echo "Restoring keys from $VAULT_INSTANCE"
-          source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/add_signer.sh")
-          #done
+          signerList=("$DEVOPS_BUILD_SIGNER" "$DEVOPS_VALIDATION_SIGNER")
+          echo "DEVOPS_VALIDATION_SIGNER $DEVOPS_VALIDATION_SIGNER"
+          echo "DEVOPS_BUILD_SIGNER $DEVOPS_BUILD_SIGNER"
+          echo "LIST $signerList"
+          for i in "${signerList[@]}"; do
+            echo "LOOP"
+            DEVOPS_SIGNER=$i
+            # Restore root & repository keys
+            echo "Restoring keys from $VAULT_INSTANCE"
+            source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/image_signing/add_signer.sh")
+          done
       # yamllint enable rule:line-length
 
   workspaces:

@@ -125,12 +125,12 @@ spec:
           export HOME="/root"
           ##########################################################################
 
-          if [ "$(resources.outputs.built-image.url)" == "" ]; then
-            export IMAGE_RESOURCE_URL="$(params.image-url)"
-          else
-            export IMAGE_RESOURCE_URL="$(resources.outputs.built-image.url)"
-          fi
-
+          #if [ "$(resources.outputs.built-image.url)" == "" ]; then
+          #  export IMAGE_RESOURCE_URL="$(params.image-url)"
+          #else
+          #  export IMAGE_RESOURCE_URL="$(resources.outputs.built-image.url)"
+          #fi
+          export IMAGE_RESOURCE_URL="$(params.image-url)"
           # Ensure login to the container registry and namespace available
           source /scripts/check_registry.sh
 

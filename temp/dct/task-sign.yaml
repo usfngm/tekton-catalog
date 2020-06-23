@@ -8,11 +8,7 @@ spec:
     - name: app-name
       description: The name of your app
     - name: api-key
-      description: The IBM Cloud API key is used to access the IBM Cloud Kubernetes
-        Service API and interact with the cluster. You can obtain your API key with
-        'ic iam api-key-create' or via the console at https://cloud.ibm.com/iam#/apikeys
-        by clicking **Create API key** (Each API key only can be viewed once).
-    - name: validation-signer
+    - name: signer
       description: current signer
     - name: registry-namespace
       description: The registry namespace
@@ -31,9 +27,6 @@ spec:
       default: https://cloud.ibm.com
     - name: working-dir
       default: "/root"
-    - name: mount-path
-      description: mount path directory
-      default: /artifacts
     - name: pipeline-debug
       description: Pipeline debug mode
       default: "0"
@@ -58,7 +51,7 @@ spec:
         - name: VAULT_INSTANCE
           value: $(params.vault-name)
         - name: DEVOPS_SIGNER
-          value: $(params.validation-signer)
+          value: $(params.signer)
         - name: IBMCLOUD_TARGET_RESOURCE_GROUP
           value: $(params.resource-group)
         - name: REGISTRY_REGION
@@ -68,13 +61,15 @@ spec:
         - name: BUILD_CLUSTER
           value: $(params.cluster-name)
         - name: ARCHIVE_DIR
-          value: $(params.mount-path)
+          value: /artifacts
         - name: IMAGE_NAME
           value: $(params.app-name)
       command: ["/bin/bash", "-c"]
       args:
         - |
           #!/bin/bash
+          echo "IBM_CLOUD_API_KEY $IBM_CLOUD_API_KEY"
+          cat /artifacts/build.properties
           source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/\
           scripts/image_signing/add_docker.sh")
           source <(curl -s -S -L "https://raw.githubusercontent.com/open-toolchain/commons/master/\
@@ -129,4 +124,5 @@ spec:
 
   workspaces:
     - name: artifacts
-      mountPath: $(params.mount-path)
+      description: A workspace backing by a volume
+      mountPath: /artifacts
