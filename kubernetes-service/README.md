@@ -1,7 +1,7 @@
 # Kubernetes-Service related tasks
 
-- **iks-fetch-config**: This task is fetching the configuration of a [IBM Cloud Kubernetes Service cluster](https://cloud.ibm.com/docs/containers?topic=containers-getting-started) that is required to perform `kubectl` commands.
-- **iks-contextual-execution**: This task is executing bash snippet/script in the context of a Kubernetes cluster configuration.
+- **[iks-fetch-config](#iks-fetch-config)**: This task is fetching the configuration of a [IBM Cloud Kubernetes Service cluster](https://cloud.ibm.com/docs/containers?topic=containers-getting-started) that is required to perform `kubectl` commands.
+- **[iks-contextual-execution](#iks-contextual-execution)**: This task is executing bash snippet/script in the context of a Kubernetes cluster configuration.
 
 **WARNING: These tasks needs to run on Kubernetes cluster with minimal version 1.16. If you are using your own Delivery Pipeline Private Worker to run your tekton pipeline(s), ensure your cluster is updated to this version at least.**
 
@@ -9,18 +9,22 @@
 - Add a github integration in your toolchain to the repository containing the task (https://github.com/open-toolchain/tekton-catalog)
 - Add that github integration to the Definitions tab of your Continuous Delivery tekton pipeline, with the Path set to `kubernetes-service`
 
-## Fetch IKS Cluster Configuration helper task
+## iks-fetch-config
+
+Fetch IKS Cluster Configuration helper task
 
 ### Context - ConfigMap/Secret
 
-  The task expects the following kubernetes resources to be defined:
+  The task may rely on the following kubernetes resources to be defined:
 
-* **Secret cd-secret**
+* **Secret secure-properties**
 
   Secret containing:
-  * **API_KEY**: An IBM Cloud Api Key use to access to the IBM Cloud Container registry service (https://cloud.ibm.com/iam/apikeys)
+  * **apikey**: An [IBM Cloud Api Key](https://cloud.ibm.com/iam/apikeys) used to access IBM Cloud Kubernetes Service. Note: secret name and secret key can be configured using Task's params.
 
-  See [sample TriggerTemplate](./sample/listener-kubernetes-service.yaml) on how to create the secret using `resourcetemplates` in a `TriggerTemplate`
+  If this secret is provided, it will be used to obtain the the git token for the git integration in the toolchain
+
+  Note: the `secure-properties` secret is injected in the Tekton Pipeline environment by Continuous Delivery Tekton Pipeline support. See [Tekton Pipelines environment and resources](https://cloud.ibm.com/docs/ContinuousDelivery?topic=ContinuousDelivery-tekton_environment#tekton_envprop)
 
 ### Parameters
 
@@ -29,6 +33,8 @@
 * **cluster-name**: (optional) the name of the cluster - required if no cluster pipeline resource provided to this task
 * **cluster-pipeline-resources-directory-fallback**: (optional) that will be used as a fallback mechanism to store the kubeconfig file for the target cluster (expressed by the inputs)
 * **pipeline-debug**: (optional) turn on task script context debugging
+* **continuous-delivery-context-secret**: (optional) name of the secret containing the continuous delivery pipeline context secret (default to `secure-properties`)
+* **kubernetes-service-apikey-secret-key**: (optional) field in the secret that contains the api key used to login to ibmcloud (default to `apikey`)
 
 ### Workspaces
 
@@ -44,18 +50,9 @@
 
 * **cluster**: (optional) The Cluster PipelineResource that will be updated as output of this task.
 
-## Kubernetes Contextual Execution helper task
+## iks-contextual-execution
 
-### Context - ConfigMap/Secret
-
-  The task expects the following kubernetes resources to be defined:
-
-* **Secret cd-secret**
-
-  Secret containing:
-  * **API_KEY**: An IBM Cloud Api Key use to access to the IBM Cloud Container registry service (https://cloud.ibm.com/iam/apikeys)
-
-  See [sample TriggerTemplate](./sample/listener-kubernetes-service.yaml) on how to create the secret using `resourcetemplates` in a `TriggerTemplate`
+Kubernetes Contextual Execution helper task
 
 ### Parameters
 
