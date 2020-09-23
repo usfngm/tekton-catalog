@@ -44,20 +44,3 @@ spec:
         outputs:
           - name: built-image
             resource: app-image
-    - name: va-scan-task
-      taskRef:
-        name: icr-check-va-scan
-      params:
-        - name: scan-report-file
-          value: "app-image-va-report.json"
-        - name: pipeline-debug
-          value: $(params.pipeline-debug)
-      workspaces:
-        - name: artifacts
-          workspace: pipeline-ws
-      resources:
-        inputs:
-          - name: image
-            resource: app-image
-            from:
-              - build-and-push-docker

@@ -63,26 +63,3 @@ spec:
         outputs:
           - name: built-image
             resource: app-image
-    - name: pipeline-3-va-task
-      taskRef:
-        name: icr-check-va-scan
-      params:
-        - name: scan-report-file
-          value: "app-image-va-report.json"
-        # - name: max-iteration
-        #   value: '5'
-        # - name: sleep-time
-        #   value: '3'
-        # - name: fail-on-scanned-issues
-        #   value: 'false'
-        - name: pipeline-debug
-          value: $(params.pipeline-debug)
-      workspaces:
-        - name: artifacts
-          workspace: pipeline-ws
-      resources:
-        inputs:
-          - name: image
-            resource: app-image
-            from:
-              - pipeline-2-cr-build-task

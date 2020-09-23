@@ -51,25 +51,3 @@ spec:
       workspaces:
         - name: source
           workspace: pipeline-ws
-    - name: va-scan-task
-      runAfter: [build-and-push-docker]
-      taskRef:
-        name: icr-check-va-scan
-      params:
-        - name: scan-report-file
-          value: "app-image-va-report.json"
-        # - name: max-iteration
-        #   value: '5'
-        # - name: sleep-time
-        #   value: '3'
-        # - name: fail-on-scanned-issues
-        #   value: 'false'
-        - name: image-url
-          value: $(tasks.build-and-push-docker.results.image-repository)
-        - name: image-digest
-          value: $(tasks.build-and-push-docker.results.image-digest)
-        - name: pipeline-debug
-          value: $(params.pipeline-debug)
-      workspaces:
-        - name: artifacts
-          workspace: pipeline-ws
